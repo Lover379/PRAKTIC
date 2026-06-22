@@ -3,12 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Praktic</title>
+    <title>Мониторинг пожаров</title>
+    <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
-    <div id="app">
-        <h1>Hello!</h1>
+    <div class="dashboard">
+        
+        <header class="header">
+            <h1>Мониторинг пожаров и вегетационных индексов</h1>
+        </header>
+
+        <div class="row">
+            <div class="box">
+                <h5>Карта очагов пожаров</h5>
+                <div id="cnt-map" class="block">
+                    <span>[ Интерактивная карта ]</span>
+                </div>
+            </div>
+            <div class="box">
+                <h5>Матрица индексов</h5>
+                <div id="cnt-heat" class="block">
+                    <span>[ Тепловая матрица ]</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="box full-width">
+                <h5>Динамика индексов</h5>
+                <div id="cnt-line" class="block">
+                    <span>[ Временные ряды ]</span>
+                </div>
+            </div>
+        </div>
+
     </div>
-    <script type="module" src="/src/main.js"></script>
 </body>
 </html>
