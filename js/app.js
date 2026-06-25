@@ -179,6 +179,7 @@ class DataFilter {
         });
     }
 
+    
     prepareTimeSeriesByYear(filteredData, indexName = 'NDVI') {
         const data = filteredData.length > 0 ? filteredData : this.dataLoader.data.stats;
         if (!data) return { dates: [], values: [], minValues: [], maxValues: [] };
@@ -293,4 +294,5 @@ class DataFilter {
             values: sorted.map(row => row[key] !== undefined ? row[key] : null)
         };
     }
-}
+
+  
