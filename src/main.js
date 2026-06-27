@@ -11,6 +11,8 @@ async function initMap() {
         };
 
         let currentTheme = 'satellite';
+        let selectedFireId = null;
+        let mapInitialized = false;
         
         const slider = document.getElementById('month-slider');
         const monthLabel = document.getElementById('month-label');
@@ -78,19 +80,26 @@ async function initMap() {
 
             let mapStyle = 'white-bg';
             let mapLayers = [];
-            const geoJsonSource = { type: 'FeatureCollection', features: filteredFeatures };
+
+            const normalFires = filteredFeatures.filter(f => f.properties?.fire_id !== selectedFireId);
+            const selectedFires = filteredFeatures.filter(f => f.properties?.fire_id === selectedFireId);
+
+            const geoJsonNormal = { type: 'FeatureCollection', features: normalFires };
+            const geoJsonSelected = { type: 'FeatureCollection', features: selectedFires };
 
             if (currentTheme === 'satellite') {
                 mapStyle = 'white-bg';
                 mapLayers = [
                     { sourcetype: 'raster', source: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], below: '' },
-                    { sourcetype: 'geojson', source: geoJsonSource, type: 'fill', color: 'rgba(255, 147, 7, 0.7)', below: '' },
+                    { sourcetype: 'geojson', source: geoJsonNormal, type: 'fill', color: 'rgba(255, 147, 7, 0.6)', below: '' },
+                    { sourcetype: 'geojson', source: geoJsonSelected, type: 'fill', color: 'rgba(255, 0, 0, 0.9)', below: '' },
                     { sourcetype: 'raster', source: ['https://basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png'], below: '' }
                 ];
             } else {
                 mapStyle = 'carto-darkmatter';
                 mapLayers = [
-                    { sourcetype: 'geojson', source: geoJsonSource, type: 'fill', color: 'rgba(255, 147, 7, 0.7)', below: '' }
+                    { sourcetype: 'geojson', source: geoJsonNormal, type: 'fill', color: 'rgba(255, 147, 7, 0.5)', below: '' },
+                    { sourcetype: 'geojson', source: geoJsonSelected, type: 'fill', color: 'rgba(255, 0, 0, 0.9)', below: '' }
                 ];
             }
 
@@ -103,7 +112,18 @@ async function initMap() {
                 showlegend: false
             };
 
-            Plotly.newPlot('cnt-map', mapData, mapLayout, { responsive: true, scrollZoom: true });
+            if (mapInitialized) {
+                Plotly.animate('cnt-map', {
+                    data: mapData,
+                    layout: { 'mapbox.layers': mapLayers }
+                }, {
+                    transition: { duration: 0 },
+                    frame: { duration: 0, redraw: true }
+                });
+            } else {
+                Plotly.newPlot('cnt-map', mapData, mapLayout, { responsive: true, scrollZoom: true });
+                mapInitialized = true;
+            }
 
             const matrixFeatures = [...filteredFeatures]
                 .sort((a, b) => (b.properties?.Area || 0) - (a.properties?.Area || 0))
@@ -152,6 +172,8 @@ async function initMap() {
                 }
             };
 
+            const infoDiv = document.getElementById('heat-info');
+
             if (matrixFeatures.length > 0) {
                 const heatDiv = document.getElementById('cnt-heat');
                 Plotly.newPlot(heatDiv, heatmapData, heatmapLayout, { responsive: true, displayModeBar: false });
@@ -163,22 +185,53 @@ async function initMap() {
                         const clickedFire = matrixFeatures[pointIndex];
                         
                         if (clickedFire) {
-                            const lat = clickedFire.properties?.lat || clickedFire.geometry?.coordinates?.[0]?.[0]?.[0]?.[1];
-                            const lon = clickedFire.properties?.lon || clickedFire.geometry?.coordinates?.[0]?.[0]?.[0]?.[0];
+                            const props = clickedFire.properties || {};
+                            selectedFireId = props.fire_id;
                             
-                            if (lat && lon) {
-                                const mapUpdate = {
-                                    'mapbox.center': { lat: Number(lat), lon: Number(lon) },
-                                    'mapbox.zoom': 8.5
-                                };
-                                Plotly.relayout('cnt-map', mapUpdate);
+                            const lat = props.lat || clickedFire.geometry?.coordinates?.[0]?.[0]?.[0]?.[1];
+                            const lon = props.lon || clickedFire.geometry?.coordinates?.[0]?.[0]?.[0]?.[0];
+                            
+                            if (infoDiv) {
+                                infoDiv.innerHTML = `<span style="color:#ff9307; font-weight:bold;">Выбран пожар №${pointIndex + 1}</span> (ID: ${props.fire_id}) &nbsp;|&nbsp; <b>Площадь:</b> ${props.Area} га &nbsp;|&nbsp; <b>Длительность:</b> ${props.duration_days} дней`;
                             }
+
+                            const updatedLayers = drawDashboardLayersOnly(filteredFeatures);
+                            
+                            const mapUpdate = {
+                                'mapbox.center': { lat: Number(lat), lon: Number(lon) },
+                                'mapbox.zoom': 9.5,
+                                'mapbox.layers': updatedLayers
+                            };
+                            
+                            Plotly.relayout('cnt-map', mapUpdate);
                         }
                     }
                 });
 
             } else {
                 document.getElementById('cnt-heat').innerHTML = '<span style="color:#555; font-size:14px;">Нет данных за этот месяц</span>';
+                if (infoDiv) infoDiv.innerHTML = '';
+            }
+        }
+
+        function drawDashboardLayersOnly(filteredFeatures) {
+            const normalFires = filteredFeatures.filter(f => f.properties?.fire_id !== selectedFireId);
+            const selectedFires = filteredFeatures.filter(f => f.properties?.fire_id === selectedFireId);
+            const geoJsonNormal = { type: 'FeatureCollection', features: normalFires };
+            const geoJsonSelected = { type: 'FeatureCollection', features: selectedFires };
+
+            if (currentTheme === 'satellite') {
+                return [
+                    { sourcetype: 'raster', source: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], below: '' },
+                    { sourcetype: 'geojson', source: geoJsonNormal, type: 'fill', color: 'rgba(255, 147, 7, 0.6)', below: '' },
+                    { sourcetype: 'geojson', source: geoJsonSelected, type: 'fill', color: 'rgba(255, 0, 0, 0.9)', below: '' },
+                    { sourcetype: 'raster', source: ['https://basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png'], below: '' }
+                ];
+            } else {
+                return [
+                    { sourcetype: 'geojson', source: geoJsonNormal, type: 'fill', color: 'rgba(255, 147, 7, 0.5)', below: '' },
+                    { sourcetype: 'geojson', source: geoJsonSelected, type: 'fill', color: 'rgba(255, 0, 0, 0.9)', below: '' }
+                ];
             }
         }
 
@@ -193,6 +246,7 @@ async function initMap() {
                     currentTheme = 'satellite';
                     toggleBtn.textContent = 'Тёмная карта';
                 }
+                mapInitialized = false; 
                 drawDashboard();
             });
         }
@@ -200,6 +254,7 @@ async function initMap() {
         if (slider && monthLabel) {
             slider.addEventListener('input', (e) => {
                 currentMonth = e.target.value;
+                selectedFireId = null;
                 monthLabel.textContent = monthsMap[currentMonth];
                 drawDashboard();
             });
