@@ -153,7 +153,30 @@ async function initMap() {
             };
 
             if (matrixFeatures.length > 0) {
-                Plotly.newPlot('cnt-heat', heatmapData, heatmapLayout, { responsive: true, displayModeBar: false });
+                const heatDiv = document.getElementById('cnt-heat');
+                Plotly.newPlot(heatDiv, heatmapData, heatmapLayout, { responsive: true, displayModeBar: false });
+
+                heatDiv.removeAllListeners('plotly_click');
+                heatDiv.on('plotly_click', (data) => {
+                    if (data.points && data.points.length > 0) {
+                        const pointIndex = data.points[0].pointNumber[1];
+                        const clickedFire = matrixFeatures[pointIndex];
+                        
+                        if (clickedFire) {
+                            const lat = clickedFire.properties?.lat || clickedFire.geometry?.coordinates?.[0]?.[0]?.[0]?.[1];
+                            const lon = clickedFire.properties?.lon || clickedFire.geometry?.coordinates?.[0]?.[0]?.[0]?.[0];
+                            
+                            if (lat && lon) {
+                                const mapUpdate = {
+                                    'mapbox.center': { lat: Number(lat), lon: Number(lon) },
+                                    'mapbox.zoom': 8.5
+                                };
+                                Plotly.relayout('cnt-map', mapUpdate);
+                            }
+                        }
+                    }
+                });
+
             } else {
                 document.getElementById('cnt-heat').innerHTML = '<span style="color:#555; font-size:14px;">Нет данных за этот месяц</span>';
             }
