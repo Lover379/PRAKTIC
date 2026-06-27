@@ -19,6 +19,34 @@
                     <h5>Карта очагов пожаров</h5>
                     <button id="btn-toggle-theme" class="btn-theme">Светлая карта</button>
                 </div>
+                
+                <div class="filter-container">
+                    <label for="month-slider">Период: <span id="month-label">Март</span></label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="month-slider" min="3" max="10" value="3" step="1" list="months-list">
+                        <datalist id="months-list">
+                            <option value="3" label="Мар"></option>
+                            <option value="4" label="Апр"></option>
+                            <option value="5" label="Май"></option>
+                            <option value="6" label="Июн"></option>
+                            <option value="7" label="Июл"></option>
+                            <option value="8" label="Авг"></option>
+                            <option value="9" label="Сен"></option>
+                            <option value="10" label="Окт"></option>
+                        </datalist>
+                        <div class="slider-labels">
+                            <span>Мар</span>
+                            <span>Апр</span>
+                            <span>Май</span>
+                            <span>Июн</span>
+                            <span>Июл</span>
+                            <span>Авг</span>
+                            <span>Сен</span>
+                            <span>Окт</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="cnt-map" class="block">
                     <span></span>
                 </div>
