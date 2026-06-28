@@ -308,4 +308,79 @@ class ChartManager {
             NBR2: '#e78ac3'
         };
     }
+
+        renderTimeSeries(containerId, data, indexName = 'NDVI') {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (!data || data.dates.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:#999;padding:50px;">Нет данных для отображения</p>';
+            return;
+        }
+
+        const traceMain = {
+            x: data.dates,
+            y: data.values,
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: `${indexName} (медиана)`,
+            line: { color: this.colors[indexName] || '#666', width: 3 },
+            marker: { size: 8, color: this.colors[indexName] || '#666' },
+            hovertemplate: '<b>%{x}</b><br>Значение: %{y:.3f}<extra></extra>'
+        };
+
+        const traces = [traceMain];
+        
+        if (data.minValues && data.minValues.length > 0) {
+            const traceMin = {
+                x: data.dates,
+                y: data.minValues,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Минимум',
+                line: { color: 'rgba(0,0,0,0.1)', width: 0 },
+                showlegend: false
+            };
+            const traceMax = {
+                x: data.dates,
+                y: data.maxValues,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Максимум',
+                fill: 'tonexty',
+                fillcolor: 'rgba(100,100,100,0.15)',
+                line: { color: 'rgba(0,0,0,0.1)', width: 0 },
+                showlegend: false
+            };
+            traces.unshift(traceMin, traceMax);
+        }
+
+        const layout = {
+            title: `Динамика индекса ${indexName}`,
+            xaxis: { 
+                title: 'Год',
+                tickangle: -45,
+                gridcolor: '#e0e0e0',
+                type: 'category'
+            },
+            yaxis: {
+                title: 'Значение индекса',
+                range: [-0.5, 1],
+                gridcolor: '#e0e0e0',
+                zeroline: true
+            },
+            hovermode: 'x unified',
+            plot_bgcolor: '#f8f9fa',
+            paper_bgcolor: '#ffffff',
+            margin: { t: 50, l: 60, r: 30, b: 70 },
+            legend: { orientation: 'h', y: 1.05 }
+        };
+
+        this.charts[containerId] = Plotly.newPlot(
+            containerId,
+            traces,
+            layout,
+            { responsive: true }
+        );
+    }
 }
