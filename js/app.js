@@ -428,4 +428,49 @@ class ChartManager {
             { responsive: true }
         );
     }
+    renderNDVIClasses(containerId, data) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (!data || data.values.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:#999;padding:50px;">Нет данных для отображения</p>';
+            return;
+        }
+
+        const colors = data.values.map(v => {
+            if (v < 10) return '#d73027';
+            if (v < 30) return '#fc8d59';
+            if (v < 50) return '#fee08b';
+            if (v < 70) return '#d9ef8b';
+            return '#1a9850';
+        });
+
+        const trace = {
+            x: data.labels,
+            y: data.values,
+            type: 'bar',
+            marker: { color: colors },
+            hovertemplate: '<b>%{x}</b><br>Площадь: %{y:.1f} га<extra></extra>'
+        };
+
+        const layout = {
+            title: 'Распределение NDVI классов',
+            xaxis: { 
+                title: 'Классы NDVI',
+                tickangle: -45
+            },
+            yaxis: { title: 'Площадь, га' },
+            plot_bgcolor: '#f8f9fa',
+            paper_bgcolor: '#ffffff',
+            margin: { t: 50, l: 60, r: 30, b: 70 }
+        };
+
+        this.charts[containerId] = Plotly.newPlot(
+            containerId,
+            [trace],
+            layout,
+            { responsive: true }
+        );
+    }
+
 }
