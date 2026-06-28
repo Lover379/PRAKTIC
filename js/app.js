@@ -473,4 +473,49 @@ class ChartManager {
         );
     }
 
+     renderVegetationStatus(containerId, data) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:#999;padding:50px;">Нет данных для отображения</p>';
+            return;
+        }
+
+        const trace1 = {
+            x: data.map(d => d.name),
+            y: data.map(d => d.degraded),
+            name: 'Деградированная',
+            type: 'bar',
+            marker: { color: '#d73027' },
+            hovertemplate: '<b>%{x}</b><br>Деградированная: %{y:.1f} га<extra></extra>'
+        };
+
+        const trace2 = {
+            x: data.map(d => d.name),
+            y: data.map(d => d.healthy),
+            name: 'Здоровая',
+            type: 'bar',
+            marker: { color: '#1a9850' },
+            hovertemplate: '<b>%{x}</b><br>Здоровая: %{y:.1f} га<extra></extra>'
+        };
+
+        const layout = {
+            title: 'Состояние растительности по полигонам',
+            xaxis: { title: 'Полигоны', tickangle: -45 },
+            yaxis: { title: 'Площадь, га' },
+            barmode: 'stack',
+            plot_bgcolor: '#f8f9fa',
+            paper_bgcolor: '#ffffff',
+            margin: { t: 50, l: 60, r: 30, b: 70 },
+            legend: { orientation: 'h', y: 1.05 }
+        };
+
+        this.charts[containerId] = Plotly.newPlot(
+            containerId,
+            [trace1, trace2],
+            layout,
+            { responsive: true }
+        );
+    }
 }
