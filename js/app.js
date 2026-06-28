@@ -609,5 +609,37 @@ class ChartManager {
             { responsive: true }
         );
     }
+
+     updateAllCharts(filteredData, filters, dataFilter) {
+        const indexName = filters.indexName || 'NDVI';
+        
+        // 1. Линейный график
+        const timeData = dataFilter.prepareTimeSeriesByYear(filteredData, indexName);
+        this.renderTimeSeries('timeSeriesChart', timeData, indexName);
+
+        // 2. Тепловая матрица
+        const heatData = dataFilter.prepareHeatmapData(filteredData);
+        this.renderHeatmap('heatmapChart', heatData);
+
+        // 3. NDVI классы
+        const classData = dataFilter.prepareNDVIClassesData(filteredData);
+        this.renderNDVIClasses('ndviClassesChart', classData);
+
+        // 4. Состояние растительности
+        const statusData = dataFilter.prepareVegetationStatusData(filteredData);
+        this.renderVegetationStatus('vegetationStatusChart', statusData);
+
+        // 5. Общий тренд
+        if (!filters.fireId) {
+            const trendData = dataFilter.prepareOverallTrend(indexName);
+            this.renderOverallTrend('overallTrendChart', trendData, indexName);
+        } else {
+            const container = document.getElementById('overallTrendChart');
+            if (container) {
+                container.innerHTML = '<p style="text-align:center;color:#999;padding:50px;">Выберите "Все полигоны" для отображения общего тренда</p>';
+            }
+        }
+    }
+}
     
 }
