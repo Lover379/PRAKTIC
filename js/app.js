@@ -34,9 +34,9 @@ class DataLoader {
             this.data.vegetation = vegetation;
             
             this.isLoaded = true;
-            console.log('✅ Все данные загружены!');
-            console.log(`📊 wide: ${wide ? wide.length : 0} записей`);
-            console.log(`📊 stats: ${stats ? stats.length : 0} записей`);
+            console.log(' Все данные загружены!');
+            console.log(` wide: ${wide ? wide.length : 0} записей`);
+            console.log(` stats: ${stats ? stats.length : 0} записей`);
             
             return this.data;
         } catch (error) {
@@ -640,6 +640,11 @@ class ChartManager {
             }
         }
     }
+    if (typeof window !== 'undefined') {
+    window.DataLoader = DataLoader;
+    window.DataFilter = DataFilter;
+    window.ChartManager = ChartManager;
+    console.log(' Классы экспортированы в window');
 }
     
-}
+
