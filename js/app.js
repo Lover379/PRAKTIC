@@ -383,4 +383,49 @@ class ChartManager {
             { responsive: true }
         );
     }
+
+    renderHeatmap(containerId, data) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (!data || data.z.length === 0 || data.x.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:#999;padding:50px;">Нет данных для отображения</p>';
+            return;
+        }
+
+        const trace = {
+            z: data.z,
+            x: data.x,
+            y: data.y,
+            type: 'heatmap',
+            colorscale: [
+                [0, '#d73027'],
+                [0.33, '#fc8d59'],
+                [0.66, '#fee08b'],
+                [1, '#1a9850']
+            ],
+            zsmooth: 'best',
+            hovertemplate: 
+                '<b>Полигон:</b> %{y}<br>' +
+                '<b>Индекс:</b> %{x}<br>' +
+                '<b>Значение:</b> %{z:.3f}<br>' +
+                '<extra></extra>'
+        };
+
+        const layout = {
+            title: 'Средние значения индексов по полигонам',
+            xaxis: { title: 'Вегетационные индексы' },
+            yaxis: { title: 'Полигоны' },
+            plot_bgcolor: '#f8f9fa',
+            paper_bgcolor: '#ffffff',
+            margin: { t: 50, l: 120, r: 30, b: 50 }
+        };
+
+        this.charts[containerId] = Plotly.newPlot(
+            containerId,
+            [trace],
+            layout,
+            { responsive: true }
+        );
+    }
 }
