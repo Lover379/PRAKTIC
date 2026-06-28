@@ -518,4 +518,96 @@ class ChartManager {
             { responsive: true }
         );
     }
+
+    renderOverallTrend(containerId, data, indexName = 'NDVI') {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (!data || data.dates.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:#999;padding:50px;">Нет данных для отображения</p>';
+            return;
+        }
+
+        const trace = {
+            x: data.dates,
+            y: data.values,
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: `${indexName} (средний)`,
+            line: { color: this.colors[indexName] || '#666', width: 3 },
+            marker: { size: 6, color: this.colors[indexName] || '#666' },
+            hovertemplate: '<b>%{x}</b><br>Среднее: %{y:.3f}<extra></extra>'
+        };
+
+        const layout = {
+            title: `Общий тренд индекса ${indexName}`,
+            xaxis: { 
+                title: 'Год',
+                tickangle: -45,
+                gridcolor: '#e0e0e0'
+            },
+            yaxis: {
+                title: 'Среднее значение',
+                range: [-0.5, 1],
+                gridcolor: '#e0e0e0',
+                zeroline: true
+            },
+            plot_bgcolor: '#f8f9fa',
+            paper_bgcolor: '#ffffff',
+            margin: { t: 50, l: 60, r: 30, b: 70 }
+        };
+
+        this.charts[containerId] = Plotly.newPlot(
+            containerId,
+            [trace],
+            layout,
+            { responsive: true }
+        );
+    }
+    renderOverallTrend(containerId, data, indexName = 'NDVI') {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (!data || data.dates.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:#999;padding:50px;">Нет данных для отображения</p>';
+            return;
+        }
+
+        const trace = {
+            x: data.dates,
+            y: data.values,
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: `${indexName} (средний)`,
+            line: { color: this.colors[indexName] || '#666', width: 3 },
+            marker: { size: 6, color: this.colors[indexName] || '#666' },
+            hovertemplate: '<b>%{x}</b><br>Среднее: %{y:.3f}<extra></extra>'
+        };
+
+        const layout = {
+            title: `Общий тренд индекса ${indexName}`,
+            xaxis: { 
+                title: 'Год',
+                tickangle: -45,
+                gridcolor: '#e0e0e0'
+            },
+            yaxis: {
+                title: 'Среднее значение',
+                range: [-0.5, 1],
+                gridcolor: '#e0e0e0',
+                zeroline: true
+            },
+            plot_bgcolor: '#f8f9fa',
+            paper_bgcolor: '#ffffff',
+            margin: { t: 50, l: 60, r: 30, b: 70 }
+        };
+
+        this.charts[containerId] = Plotly.newPlot(
+            containerId,
+            [trace],
+            layout,
+            { responsive: true }
+        );
+    }
+    
 }
