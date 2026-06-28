@@ -640,11 +640,12 @@ class ChartManager {
             }
         }
     }
-    if (typeof window !== 'undefined') {
+}
+if (typeof window !== 'undefined') {
     window.DataLoader = DataLoader;
     window.DataFilter = DataFilter;
     window.ChartManager = ChartManager;
-    console.log(' Классы экспортированы в window');
+    console.log('✅ Классы экспортированы в window');
 }
     
 
