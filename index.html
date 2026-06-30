@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мониторинг пожаров</title>
     <link rel="stylesheet" href="/src/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
     <div class="dashboard">
@@ -14,10 +15,10 @@
         </header>
 
         <div class="row">
-            <div class="box">
+            <div class="box main-controls-box">
                 <div class="box-header">
                     <h5>Карта очагов пожаров</h5>
-                    <button id="btn-toggle-theme" class="btn-theme">Светлая карта</button>
+                    <button id="btn-toggle-theme" class="btn-theme">Тёмная карта</button>
                 </div>
                 
                 <div class="filter-container">
@@ -48,22 +49,32 @@
                 </div>
 
                 <div id="cnt-map" class="block">
-                    <span></span>
+                    <span>Загрузка интерактивной карты...</span>
                 </div>
             </div>
+            
             <div class="box">
-                <h5>Матрица индексов</h5>
+                <h5>Матрица индексов (Топ-15 крупных пожаров)</h5>
+                <div id="heat-info" class="selected-fire-info">
+                    <span style="color: #666; font-style: italic;">Кликните на полигон карты или ячейку матрицы для анализа детальной статистики</span>
+                </div>
                 <div id="cnt-heat" class="block">
                     <span>[ Тепловая матрица ]</span>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="box full-width">
-                <h5>Динамика индексов</h5>
-                <div id="cnt-line" class="block">
-                    <span>[ Временные ряды ]</span>
+        <div class="row bottom-analytics">
+            <div class="box">
+                <h5>Многолетний тренд NDVI</h5>
+                <div id="cnt-trend" class="block">
+                    <span>[ Загрузка графика динамического тренда... ]</span>
+                </div>
+            </div>
+            <div class="box">
+                <h5>Распределение классов вегетации</h5>
+                <div id="cnt-classes" class="block">
+                    <span>[ Загрузка распределения классов... ]</span>
                 </div>
             </div>
         </div>

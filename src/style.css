@@ -41,10 +41,6 @@ body {
     transition: border-color 0.3s;
 }
 
-.box.full-width {
-    flex: 1 1 100%;
-}
-
 .box-header {
     display: flex;
     justify-content: space-between;
@@ -110,7 +106,6 @@ body {
     margin: 0;
 }
 
-/* Стилизация встроенных делений под инпутом */
 .slider-wrapper input[type="range"]::-webkit-slider-runnable-track {
     margin-bottom: 2px;
 }
@@ -145,10 +140,19 @@ body {
     font-size: 14px;
 }
 
-#cnt-map, #cnt-heat {
+#cnt-map, #cnt-heat, #cnt-trend, #cnt-classes {
     height: 45vh;
 }
 
-#cnt-line {
-    height: 35vh;
+.selected-fire-info {
+    min-height: 24px;
+    margin-bottom: 10px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 3px solid #ff9307;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #ccc;
+    display: flex;
+    align-items: center;
 }
