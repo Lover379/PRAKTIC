@@ -381,6 +381,7 @@ async function initDashboard() {
 
     } catch (error) {
         console.error(error);
+        
     }
 }
 
