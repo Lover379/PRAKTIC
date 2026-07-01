@@ -10,17 +10,22 @@
 <body>
     <div class="dashboard">
         
+        <header class="summary-stats">
+            <div class="stat-item">Количество пожаров: <span id="stat-count">719</span></div>
+            <div class="stat-item">За период: <span id="stat-period">3/31/2020 - 10/31/2020</span></div>
+            <div class="stat-item">Средняя длительность пожара, дни: <span id="stat-duration">7.170</span></div>
+        </header>
+
         <header class="header">
             <h1>Мониторинг пожаров и вегетационных индексов</h1>
         </header>
-
+        
         <div class="row">
             <div class="box main-controls-box">
                 <div class="box-header">
                     <h5>Карта очагов пожаров</h5>
                     <button id="btn-toggle-theme" class="btn-theme">Тёмная карта</button>
                 </div>
-                
                 <div class="filter-container">
                     <label for="month-slider">Период: <span id="month-label">Март</span></label>
                     <div class="slider-wrapper">
@@ -47,14 +52,11 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="cnt-map" class="block">
-                    <span>Загрузка интерактивной карты...</span>
                 </div>
             </div>
-            
             <div class="box">
-                <h5>Матрица индексов (Топ-15 крупных пожаров)</h5>
+                <h5>Матрица параметров пожаров</h5>
                 <div id="heat-info" class="selected-fire-info">
                     <span style="color: #666; font-style: italic;">Кликните на полигон карты или ячейку матрицы для анализа детальной статистики</span>
                 </div>
@@ -66,21 +68,80 @@
 
         <div class="row bottom-analytics">
             <div class="box">
-                <h5>Многолетний тренд NDVI</h5>
+                <h5>Динамика спектральных индексов по годам</h5>
                 <div id="cnt-trend" class="block">
-                    <span>[ Загрузка графика динамического тренда... ]</span>
                 </div>
             </div>
-            <div class="box">
-                <h5>Распределение классов вегетации</h5>
-                <div id="cnt-classes" class="block">
-                    <span>[ Загрузка распределения классов... ]</span>
+            
+            <div class="box filter-control-panel">
+                <h5>Параметры анализа и группировки</h5>
+                <div class="control-panel-content">
+                    <div class="control-group">
+                        <label for="select-index-group">Группы индексов</label>
+                        <select id="select-index-group" class="custom-select">
+                            <option value="All">(All)</option>
+                            <option value="Влажность и старение">Влажность и старение</option>
+                            <option value="Выгорание">Выгорание</option>
+                            <option value="Почва">Почва</option>
+                            <option value="Растительность">Растительность</option>
+                            <option value="Хлорофилл и пигменты">Хлорофилл и пигменты</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="select-forestry">Леничество</label>
+                        <select id="select-forestry" class="custom-select">
+                            <option value="All">(All)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="select-time-scale">Шкала времени</label>
+                        <select id="select-time-scale" class="custom-select">
+                            <option value="all_stages">До/Во время/После пожара</option>
+                            <option value="fact">Фактические</option>
+                            <option value="decades">Декады</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="select-active-index">Активный индекс для тренда</label>
+                        <select id="select-active-index" class="custom-select">
+                            <option value="NDVI">NDVI</option>
+                            <option value="NBR">NBR</option>
+                            <option value="NBRPLUS">NBRPLUS</option>
+                            <option value="IPVI">IPVI</option>
+                            <option value="SAVI">SAVI</option>
+                            <option value="NDWI">NDWI</option>
+                            <option value="MSAVI">MSAVI</option>
+                            <option value="NBR2">NBR2</option>
+                            <option value="BAIS2">BAIS2</option>
+                            <option value="DVI">DVI</option>
+                            <option value="BAI">BAI</option>
+                            <option value="RVI">RVI</option>
+                            <option value="GCI">GCI</option>
+                            <option value="CIRE">CIRE</option>
+                            <option value="PSRI">PSRI</option>
+                            <option value="SIPI">SIPI</option>
+                            <option value="EVI">EVI</option>
+                            <option value="GARI">GARI</option>
+                            <option value="ARVI">ARVI</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="box" style="flex: 1 1 100%;">
+                <h5>Приоритет изменения индексов</h5>
+                <div id="cnt-index-priority" class="block">
+                    <span>[ Загрузка матрицы приоритетов индексов... ]</span>
                 </div>
             </div>
         </div>
 
     </div>
-
     <script type="module" src="/src/main.js"></script>
 </body>
 </html>
