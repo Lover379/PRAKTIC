@@ -1,6 +1,7 @@
 const Plotly = window.Plotly;
 const Papa = window.Papa;
 
+
 const MONTH_NAMES = { 2: 'Все', 3: 'Март', 4: 'Апрель', 5: 'Май', 6: 'Июнь', 7: 'Июль', 8: 'Август', 9: 'Сентябрь' };
 
 class DataLoader {
