@@ -16,7 +16,14 @@ class DataLoader {
 async function initDashboard() {
     const loader = new DataLoader();
     
-    const [geoResponse] = await Promise.all([fetch('/data/fires_2005_irk_filtered.geojson'), loader.loadAllData()]);
+    const geoResponse = await fetch('/data/fires_2005_irk_filtered.geojson');
+    
+    if (!geoResponse.ok) {
+        console.error(`Ошибка загрузки геоданных! Статус: ${geoResponse.status}. URL: ${geoResponse.url}`);
+        return;
+    }
+    
+    await loader.loadAllData();
     const geojsonData = await geoResponse.json();
     const allFeatures = geojsonData.features || [];
 
@@ -38,6 +45,24 @@ async function initDashboard() {
     if (polygonSelect) {
         const ids = [...new Set(allFeatures.map(f => f.properties?.fire_id).filter(Boolean))].sort((a,b) => a-b);
         ids.forEach(id => polygonSelect.add(new Option(`Полигон ${id}`, id)));
+    }
+
+    const mapDiv = document.getElementById('cnt-map');
+    if (mapDiv) {
+        Plotly.newPlot(mapDiv, [{
+            type: 'scattermapbox',
+            lon: [104.28],
+            lat: [52.28],
+            mode: 'markers',
+            marker: { opacity: 0 }
+        }], {
+            margin: { r: 0, t: 0, l: 0, b: 0 },
+            mapbox: {
+                style: 'open-street-map',
+                center: { lat: 52.28, lon: 104.28 },
+                zoom: 6.5
+            }
+        }, { responsive: true });
     }
 
     function drawDashboard() {
@@ -67,6 +92,8 @@ async function initDashboard() {
     }
 
     function updateMap(features) {
+        if (!mapDiv) return;
+
         const lons = [], lats = [], texts = [];
         features.forEach(f => {
             const p = f.properties || {};
@@ -79,11 +106,32 @@ async function initDashboard() {
         const normalFires = features.filter(f => String(f.properties?.fire_id) !== String(selectedFireId));
         const selectedFires = features.filter(f => String(f.properties?.fire_id) === String(selectedFireId));
 
-        const layers = [
-            currentTheme === 'satellite' ? { sourcetype: 'raster', source: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'] } : null,
-            { sourcetype: 'geojson', source: { type: 'FeatureCollection', features: normalFires }, type: 'fill', color: 'rgba(255, 147, 7, 0.5)' },
-            { sourcetype: 'geojson', source: { type: 'FeatureCollection', features: selectedFires }, type: 'fill', color: 'rgba(255, 0, 0, 0.9)' }
-        ].filter(Boolean);
+        const layers = [];
+        if (currentTheme === 'satellite') {
+            layers.push({
+                sourcetype: 'raster',
+                source: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+                below: ''
+            });
+        }
+
+        if (normalFires.length) {
+            layers.push({
+                sourcetype: 'geojson',
+                source: { type: 'FeatureCollection', features: normalFires },
+                type: 'fill',
+                color: 'rgba(255, 147, 7, 0.5)'
+            });
+        }
+
+        if (selectedFires.length) {
+            layers.push({
+                sourcetype: 'geojson',
+                source: { type: 'FeatureCollection', features: selectedFires },
+                type: 'fill',
+                color: 'rgba(255, 0, 0, 0.9)'
+            });
+        }
 
         let mapCenter = { lat: 52.28, lon: 104.28 };
         let mapZoom = 6.5;
@@ -96,13 +144,10 @@ async function initDashboard() {
             }
         }
 
-        const mapDiv = document.getElementById('cnt-map');
-        if (!mapDiv) return;
-
         Plotly.react(mapDiv, [{ 
             type: 'scattermapbox', 
-            lon: lons, 
-            lat: lats, 
+            lon: lons.length ? lons : [104.28], 
+            lat: lats.length ? lats : [52.28], 
             mode: 'markers', 
             marker: { opacity: 0 }, 
             text: texts, 
@@ -141,9 +186,12 @@ async function initDashboard() {
         ];
 
         Plotly.newPlot(heatDiv, [{
-            z: zValues, x: sorted.map(f => String(f.properties?.fire_id)), y: yLabels,
+            z: zValues.length && zValues[0].length ? zValues : [[0], [0], [0]], 
+            x: sorted.map(f => String(f.properties?.fire_id)), 
+            y: yLabels,
             customdata: yLabels.map(() => sorted.map(f => f.properties?.fire_id)),
-            type: 'heatmap', colorscale: 'YlOrRd'
+            type: 'heatmap', 
+            colorscale: 'YlOrRd'
         }], { 
             paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
             font: { color: '#aaa', size: 11 },
