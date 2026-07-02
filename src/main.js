@@ -1,5 +1,5 @@
-const Plotly = window.Plotly;
-const Papa = window.Papa;
+import Plotly from 'plotly.js-dist-min';
+import Papa from 'papaparse';
 
 const MONTH_NAMES = { 2: 'Все', 3: 'Март', 4: 'Апрель', 5: 'Май', 6: 'Июнь', 7: 'Июль', 8: 'Август', 9: 'Сентябрь' };
 
@@ -8,22 +8,45 @@ class DataLoader {
     
     async loadAllData() {
         const loadCSV = (path) => new Promise(res => Papa.parse(path, { download: true, header: true, dynamicTyping: true, skipEmptyLines: true, complete: r => res(r.data) }));
-        this.data.long = await loadCSV('data/vi_long_format.csv');
-        this.data.viByYear = await loadCSV('data/dashboard_vi_by_year.csv');
+        this.data.long = await loadCSV('/data/vi_long_format.csv');
+        this.data.viByYear = await loadCSV('/data/dashboard_vi_by_year.csv');
+    }
+}
+
+class ChartManager {
+    constructor() {
+        this.colors = { NDVI: '#1a9850', NBR: '#d73027', EVI: '#2b83ba', BAI: '#fdae61', NDWI: '#66c2a5', SAVI: '#8da0cb', NBR2: '#e78ac3' };
+    }
+
+    renderTimeSeries(containerId, data, indexName = 'NDVI') {
+        const container = document.getElementById(containerId);
+        if (!container || !data.dates?.length) return;
+
+        const trace = {
+            x: data.dates, y: data.values, type: 'scatter', mode: 'lines+markers',
+            name: `${indexName} (медиана)`,
+            line: { color: this.colors[indexName] || '#666', width: 3 },
+            marker: { size: 8 }
+        };
+
+        const layout = {
+            title: { text: `Динамика индекса ${indexName}`, font: { color: '#aaa', size: 14 } },
+            paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: '#aaa' },
+            xaxis: { title: 'Год', type: 'category', gridcolor: '#222' },
+            yaxis: { title: 'Значение индекса', gridcolor: '#222' },
+            margin: { t: 50, l: 60, r: 30, b: 50 }
+        };
+
+        Plotly.newPlot(containerId, [trace], layout, { responsive: true });
     }
 }
 
 async function initDashboard() {
     const loader = new DataLoader();
+    const chartManager = new ChartManager();
     
-    const geoResponse = await fetch('data/fires_2005_irk_filtered.geojson');
-    
-    if (!geoResponse.ok) {
-        console.error(`Ошибка загрузки геоданных! Статус: ${geoResponse.status}. URL: ${geoResponse.url}`);
-        return;
-    }
-    
-    await loader.loadAllData();
+    const [geoResponse] = await Promise.all([fetch('/data/fires_2005_irk_filtered.geojson'), loader.loadAllData()]);
     const geojsonData = await geoResponse.json();
     const allFeatures = geojsonData.features || [];
 
@@ -45,24 +68,6 @@ async function initDashboard() {
     if (polygonSelect) {
         const ids = [...new Set(allFeatures.map(f => f.properties?.fire_id).filter(Boolean))].sort((a,b) => a-b);
         ids.forEach(id => polygonSelect.add(new Option(`Полигон ${id}`, id)));
-    }
-
-    const mapDiv = document.getElementById('cnt-map');
-    if (mapDiv) {
-        Plotly.newPlot(mapDiv, [{
-            type: 'scattermapbox',
-            lon: [104.28],
-            lat: [52.28],
-            mode: 'markers',
-            marker: { opacity: 0 }
-        }], {
-            margin: { r: 0, t: 0, l: 0, b: 0 },
-            mapbox: {
-                style: 'open-street-map',
-                center: { lat: 52.28, lon: 104.28 },
-                zoom: 6.5
-            }
-        }, { responsive: true });
     }
 
     function drawDashboard() {
@@ -92,8 +97,6 @@ async function initDashboard() {
     }
 
     function updateMap(features) {
-        if (!mapDiv) return;
-
         const lons = [], lats = [], texts = [];
         features.forEach(f => {
             const p = f.properties || {};
@@ -106,32 +109,11 @@ async function initDashboard() {
         const normalFires = features.filter(f => String(f.properties?.fire_id) !== String(selectedFireId));
         const selectedFires = features.filter(f => String(f.properties?.fire_id) === String(selectedFireId));
 
-        const layers = [];
-        if (currentTheme === 'satellite') {
-            layers.push({
-                sourcetype: 'raster',
-                source: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-                below: ''
-            });
-        }
-
-        if (normalFires.length) {
-            layers.push({
-                sourcetype: 'geojson',
-                source: { type: 'FeatureCollection', features: normalFires },
-                type: 'fill',
-                color: 'rgba(255, 147, 7, 0.5)'
-            });
-        }
-
-        if (selectedFires.length) {
-            layers.push({
-                sourcetype: 'geojson',
-                source: { type: 'FeatureCollection', features: selectedFires },
-                type: 'fill',
-                color: 'rgba(255, 0, 0, 0.9)'
-            });
-        }
+        const layers = [
+            currentTheme === 'satellite' ? { sourcetype: 'raster', source: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'] } : null,
+            { sourcetype: 'geojson', source: { type: 'FeatureCollection', features: normalFires }, type: 'fill', color: 'rgba(255, 147, 7, 0.5)' },
+            { sourcetype: 'geojson', source: { type: 'FeatureCollection', features: selectedFires }, type: 'fill', color: 'rgba(255, 0, 0, 0.9)' }
+        ].filter(Boolean);
 
         let mapCenter = { lat: 52.28, lon: 104.28 };
         let mapZoom = 6.5;
@@ -144,22 +126,11 @@ async function initDashboard() {
             }
         }
 
-        Plotly.react(mapDiv, [{ 
-            type: 'scattermapbox', 
-            lon: lons.length ? lons : [104.28], 
-            lat: lats.length ? lats : [52.28], 
-            mode: 'markers', 
-            marker: { opacity: 0 }, 
-            text: texts, 
-            hoverinfo: 'text' 
-        }], {
-            margin: { r:0, t:0, l:0, b:0 },
-            mapbox: { 
-                style: currentTheme === 'satellite' ? 'white-bg' : 'carto-darkmatter', 
-                center: mapCenter,
-                zoom: mapZoom,
-                layers: layers
-            }
+        const mapDiv = document.getElementById('cnt-map');
+        if (!mapDiv) return;
+
+        Plotly.react(mapDiv, [{ type: 'scattermapbox', lon: lons, lat: lats, mode: 'markers', marker: { opacity: 0 }, text: texts, hoverinfo: 'text' }], {
+            margin: { r:0, t:0, l:0, b:0 }, mapbox: { style: currentTheme === 'satellite' ? 'white-bg' : 'carto-darkmatter', center: mapCenter, zoom: mapZoom, layers }
         }, { responsive: true });
 
         mapDiv.removeAllListeners('plotly_click');
@@ -186,12 +157,9 @@ async function initDashboard() {
         ];
 
         Plotly.newPlot(heatDiv, [{
-            z: zValues.length && zValues[0].length ? zValues : [[0], [0], [0]], 
-            x: sorted.map(f => String(f.properties?.fire_id)), 
-            y: yLabels,
+            z: zValues, x: sorted.map(f => String(f.properties?.fire_id)), y: yLabels,
             customdata: yLabels.map(() => sorted.map(f => f.properties?.fire_id)),
-            type: 'heatmap', 
-            colorscale: 'YlOrRd'
+            type: 'heatmap', colorscale: 'YlOrRd'
         }], { 
             paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
             font: { color: '#aaa', size: 11 },
@@ -281,6 +249,8 @@ async function initDashboard() {
             xaxis: { type: 'category', gridcolor: '#222' },
             yaxis: { gridcolor: '#222' }
         }, { responsive: true });
+
+        chartManager.renderTimeSeries('timeSeriesChart', { dates: years, values: bgValues }, selectedIndexName);
     }
 
     if (polygonSelect) polygonSelect.addEventListener('change', e => { selectedFireId = e.target.value === 'All' ? null : Number(e.target.value); drawDashboard(); });
