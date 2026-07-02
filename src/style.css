@@ -116,13 +116,15 @@ body {
 }
 .box {
     flex: 1 1 calc(50% - 10px); 
-    min-width: 320px; 
+    min-width: 45%; 
     background-color: #111;
     border: 1px solid #333;
     border-radius: 8px;
     padding: 15px;
     box-sizing: border-box;
     transition: border-color 0.3s;
+    position: relative;
+    overflow: hidden;
 }
 .box-header {
     display: flex;
@@ -131,7 +133,7 @@ body {
     margin-bottom: 15px;
 }
 .box h5, .box-header h5 {
-    margin: 0;
+    margin: 0 0 10px 0;
     font-size: 16px;
     color: #aaa;
 }
@@ -189,17 +191,12 @@ body {
     background-color: #0c0c0c;
     border: 1px dashed #222;
     border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.block span {
-    color: #555;
-    font-size: 14px;
+    width: 100%;
 }
 
 #cnt-map, #cnt-heat, #cnt-timeline-chart {
-    height: 45vh;
+    height: 400px;
+    width: 100%;
 }
 .selected-fire-info {
     min-height: 44px;
@@ -237,6 +234,7 @@ body {
     background-color: transparent !important;
     height: auto !important;
     display: block !important;
+    width: 100%;
 }
 .tableau-grid-container {
     width: 100%;
@@ -285,48 +283,6 @@ body {
     border-color: #ff9307;
     z-index: 10;
 }
-.matrix-cell.faded {
-    opacity: 0.22; 
-}
-.matrix-cell.hidden-by-group {
-    opacity: 0.05;
-    filter: grayscale(1) blur(1px);
-    pointer-events: none; 
-}
-.matrix-cell.cell-active {
-    opacity: 1 !important;
-    border: 2px solid #ffffff !important;
-    box-shadow: 0 0 14px rgba(255,255,255,0.5);
-}
-.cell-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: #ffffff;
-}
-.idx-title {
-    font-weight: bold;
-    font-size: 11px;
-    letter-spacing: 0.3px;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
-}
-.idx-val {
-    font-size: 9px;
-    opacity: 0.85;
-    margin-top: 2px;
-    text-shadow: 0 1px 1px rgba(0,0,0,0.6);
-}
-
-.js-plotly-plot .draglayer, 
-.js-plotly-plot .nsewdrag, 
-.js-plotly-plot .xdrag, 
-.js-plotly-plot .ydrag {
-    cursor: default !important;
-}
-#cnt-heat .main-svg .image {
-    cursor: pointer !important;
-}
 
 .style-slider-map {
     display: flex;
@@ -357,9 +313,4 @@ body {
 }
 .slider-ticks span:hover {
     color: #bbb;
-}
-.slider-ticks span.active-tick {
-    color: #ff9307;
-    font-weight: bold;
-    
 }
