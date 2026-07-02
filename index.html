@@ -5,38 +5,140 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мониторинг пожаров</title>
     <link rel="stylesheet" href="/src/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
     <div class="dashboard">
         
+        <header class="summary-stats">
+            <div class="stat-item">Количество пожаров: <span id="stat-count">0</span></div>
+            <div class="stat-item">За период: <span id="stat-period">2005 год</span></div>
+            <div class="stat-item">Средняя длительность пожара, дни: <span id="stat-duration">0.0</span></div>
+        </header>
+
         <header class="header">
             <h1>Мониторинг пожаров и вегетационных индексов</h1>
         </header>
 
+        <div class="box toolbar-filters">
+            <div class="control-group">
+                <label for="select-polygon">Полигон</label>
+                <select id="select-polygon" class="custom-select">
+                    <option value="All">Все полигоны</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="select-active-index">Индекс</label>
+                <select id="select-active-index" class="custom-select">
+                    <option value="NDVI">NDVI</option>
+                    <option value="NBR">NBR</option>
+                    <option value="NBRPLUS">NBRPLUS</option>
+                    <option value="IPVI">IPVI</option>
+                    <option value="SAVI">SAVI</option>
+                    <option value="NDWI">NDWI</option>
+                    <option value="MSAVI">MSAVI</option>
+                    <option value="NBR2">NBR2</option>
+                    <option value="BAIS2">BAIS2</option>
+                    <option value="DVI">DVI</option>
+                    <option value="BAI">BAI</option>
+                    <option value="RVI">RVI</option>
+                    <option value="GCI">GCI</option>
+                    <option value="CIRE">CIRE</option>
+                    <option value="PSRI">PSRI</option>
+                    <option value="SIPI">SIPI</option>
+                    <option value="EVI">EVI</option>
+                    <option value="GARI">GARI</option>
+                    <option value="ARVI">ARVI</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="select-veg-type">Тип растительности</label>
+                <select id="select-veg-type" class="custom-select">
+                    <option value="All">Все типы</option>
+                    <option value="Поля">Поля</option>
+                    <option value="Пастбища">Пастбища</option>
+                    <option value="Редколесье">Редколесье</option>
+                    <option value="Кустарники">Кустарники</option>
+                    <option value="Хвойный лес">Хвойный лес</option>
+                    <option value="Смешанный лес">Смешанный лес</option>
+                    <option value="Лиственные">Лиственные</option>
+                </select>
+            </div>
+
+            <div class="control-group area-range-group">
+                <label>Площадь от</label>
+                <div class="area-inputs">
+                    <input type="number" id="input-area-min" class="custom-input" placeholder="мин га" min="0">
+                    <span class="label-to">до</span>
+                    <input type="number" id="input-area-max" class="custom-input" placeholder="макс га" min="0">
+                </div>
+            </div>
+
+            <div class="control-group btn-reset-group">
+                <button id="btn-main-reset" class="btn-reset">Сбросить</button>
+            </div>
+        </div>
+        
         <div class="row">
-            <div class="box">
-                <h5>Карта очагов пожаров</h5>
+            <div class="box main-controls-box">
+                <div class="box-header">
+                    <h5>Карта очагов пожаров</h5>
+                    <button id="btn-toggle-theme" class="btn-theme">Тёмная карта</button>
+                </div>
+                <div class="filter-container">
+                    <div class="inline-filter-item style-slider-map">
+                        <div class="slider-header">
+                            <label for="slider-month">Месяц: <span id="month-label">Все</span></label>
+                        </div>
+                        <input type="range" id="slider-month" min="2" max="9" value="2" step="1">
+                        <div class="slider-ticks">
+                            <span data-val="2" style="position: absolute; left: 0%; transform: translateX(0%); text-align: left;">Все</span>
+                            <span data-val="3" style="position: absolute; left: 14.28%; transform: translateX(-50%);">Март</span>
+                            <span data-val="4" style="position: absolute; left: 28.57%; transform: translateX(-50%);">Апр</span>
+                            <span data-val="5" style="position: absolute; left: 42.85%; transform: translateX(-50%);">Май</span>
+                            <span data-val="6" style="position: absolute; left: 57.14%; transform: translateX(-50%);">Июн</span>
+                            <span data-val="7" style="position: absolute; left: 71.42%; transform: translateX(-50%);">Июл</span>
+                            <span data-val="8" style="position: absolute; left: 85.71%; transform: translateX(-50%);">Авг</span>
+                            <span data-val="9" style="position: absolute; left: 100%; transform: translateX(-100%); text-align: right;">Сен</span>
+                        </div>
+                    </div>
+                </div>
                 <div id="cnt-map" class="block">
-                    <span>[ Интерактивная карта ]</span>
+                    <span>Загрузка интерактивной карты...</span>
                 </div>
             </div>
             <div class="box">
-                <h5>Матрица индексов</h5>
+                <h5>Матрица параметров пожаров</h5>
+                <div id="heat-info" class="selected-fire-info">
+                    <span style="color: #666; font-style: italic;">Кликните на полигон карты или ячейку матрицы для анализа детальной статистики</span>
+                </div>
                 <div id="cnt-heat" class="block">
                     <span>[ Тепловая матрица ]</span>
                 </div>
             </div>
         </div>
 
+        <div class="row bottom-analytics">
+            <div class="box" style="flex: 1 1 100%;">
+                <h5>Динамика спектральных индексов по годам</h5>
+                <div id="cnt-timeline-chart" class="block">
+                    <span>[ Загрузка графика временных изменений... ]</span>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
-            <div class="box full-width">
-                <h5>Динамика индексов</h5>
-                <div id="cnt-line" class="block">
-                    <span>[ Временные ряды ]</span>
+            <div class="box" style="flex: 1 1 100%;">
+                <h5>Приоритет изменения индексов</h5>
+                <div id="cnt-index-priority" class="block">
+                    <span>[ Загрузка матрицы приоритетов индексов... ]</span>
                 </div>
             </div>
         </div>
 
     </div>
+    <script type="module" src="/src/main.js"></script>
 </body>
 </html>
