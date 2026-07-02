@@ -1,10 +1,4 @@
-<<<<<<< HEAD
 
-// DATA LOADER
-=======
-//  DATA LOADER 
-
->>>>>>> feature-map
 class DataLoader {
     constructor() {
         this.data = {
@@ -106,11 +100,7 @@ class DataLoader {
 }
 
 
-// DATA FILTER
-<<<<<<< HEAD
-=======
 
->>>>>>> feature-map
 class DataFilter {
     constructor(dataLoader) {
         this.dataLoader = dataLoader;
@@ -187,10 +177,6 @@ class DataFilter {
         });
     }
 
-<<<<<<< HEAD
-=======
-    
->>>>>>> feature-map
     prepareTimeSeriesByYear(filteredData, indexName = 'NDVI') {
         const data = filteredData.length > 0 ? filteredData : this.dataLoader.data.stats;
         if (!data) return { dates: [], values: [], minValues: [], maxValues: [] };
@@ -305,7 +291,7 @@ class DataFilter {
             values: sorted.map(row => row[key] !== undefined ? row[key] : null)
         };
     }
-<<<<<<< HEAD
+
 }
 
 // CHART MANAGER
@@ -661,8 +647,3 @@ if (typeof window !== 'undefined') {
     window.ChartManager = ChartManager;
     console.log('Классы экспортированы в window');
 }
-    
-=======
-
-  
->>>>>>> feature-map
