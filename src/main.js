@@ -1,5 +1,5 @@
-import Plotly from 'plotly.js-dist-min';
-import Papa from 'papaparse';
+import Plotly from 'https://cdn.plot.ly/plotly-2.35.2.min.js';
+import Papa from 'https://cdn.jsdelivr.net/npm/papaparse@5.4.1/+esm';
 
 const MONTH_NAMES = { 2: 'Все', 3: 'Март', 4: 'Апрель', 5: 'Май', 6: 'Июнь', 7: 'Июль', 8: 'Август', 9: 'Сентябрь' };
 
