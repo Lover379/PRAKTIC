@@ -8,15 +8,15 @@ class DataLoader {
     
     async loadAllData() {
         const loadCSV = (path) => new Promise(res => Papa.parse(path, { download: true, header: true, dynamicTyping: true, skipEmptyLines: true, complete: r => res(r.data) }));
-        this.data.long = await loadCSV('/data/vi_long_format.csv');
-        this.data.viByYear = await loadCSV('/data/dashboard_vi_by_year.csv');
+        this.data.long = await loadCSV('data/vi_long_format.csv');
+        this.data.viByYear = await loadCSV('data/dashboard_vi_by_year.csv');
     }
 }
 
 async function initDashboard() {
     const loader = new DataLoader();
     
-    const geoResponse = await fetch('/data/fires_2005_irk_filtered.geojson');
+    const geoResponse = await fetch('data/fires_2005_irk_filtered.geojson');
     
     if (!geoResponse.ok) {
         console.error(`Ошибка загрузки геоданных! Статус: ${geoResponse.status}. URL: ${geoResponse.url}`);
