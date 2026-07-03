@@ -283,4 +283,5 @@ async function initDashboard() {
     drawDashboard();
 }
 
+
 window.addEventListener('DOMContentLoaded', initDashboard);
